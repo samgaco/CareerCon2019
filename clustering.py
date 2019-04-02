@@ -3,7 +3,7 @@ import numpy as np
 import os
 import pickle
 from sklearn.cluster import KMeans
-## data
+## data parida
 
 cwd = os.chdir('/home/samuel/Work/coffe2/data/datacc2019')
 
