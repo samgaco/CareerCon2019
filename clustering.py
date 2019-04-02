@@ -4,6 +4,7 @@ import os
 import pickle
 from sklearn.cluster import KMeans
 ## data pariolo
+# Cesc probando probando
 
 cwd = os.chdir('/home/samuel/Work/coffe2/data/datacc2019')
 
