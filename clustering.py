@@ -3,25 +3,30 @@ import numpy as np
 import os
 import pickle
 from sklearn.cluster import KMeans
-## data pariolo
-# Cesc probando probando
 
-cwd = os.chdir('/home/samuel/Work/coffe2/data/datacc2019')
+## data
 
-data_train_path = '/home/samuel/Work/coffe2/data/datacc2019/X_train.csv'
-response_train_path = '/home/samuel/Work/coffe2/data/datacc2019/y_train.csv'
-test_data_path = '/home/samuel/Work/coffe2/data/datacc2019/X_test.csv'
-sub_data_path = '/home/samuel/Work/coffe2/data/datacc2019/sample_submission.csv'
+Sam_Dir = '/home/samuel/Work/coffe2/data/datacc2019'
+Ces_Dir = 'D:/Estudi/Uni/Actual/z_Altres/Python/projects/career_con_2019/Data'
+# Elegir directori segons usuari
+Name_Dir = Ces_Dir
 
-data_train = pd.read_csv(data_train_path)
-response_train = pd.read_csv(response_train_path)
-data_test = pd.read_csv(test_data_path)
-sub_data = pd.read_csv(sub_data_path)
+def load_data(dir_name):
+    cwd = os.chdir(dir_name)
+    
+    data_train = pd.read_csv(dir_name + '/X_train.csv')
+    response_train = pd.read_csv(dir_name + '/y_train.csv')
+    data_test = pd.read_csv(dir_name + '/X_test.csv')
+    sub_data = pd.read_csv(dir_name + '/sample_submission.csv')
+    #flat sets can be substituted by different sets, we could try grouping by means again, and adding std, etc
+    data_test_flat = pd.read_pickle(dir_name + '/data_test_flat.pkl')
+    data_train_flat = pd.read_pickle(dir_name + '/data_train_flat.pkl')
+    
+    return data_train, response_train, data_test, sub_data, data_test_flat, data_train_flat
 
-#flat sets can be substituted by different sets, we could try grouping by means again, and adding std, etc
+data_train, response_train, data_test, sub_data, \
+data_test_flat, data_train_flat = load_data(Name_Dir)
 
-data_test_flat = pd.read_pickle('/home/samuel/Work/coffe2/data/datacc2019/data_test_flat.pkl')
-data_train_flat = pd.read_pickle('/home/samuel/Work/coffe2/data/datacc2019/data_train_flat.pkl')
 
 data_train_flat.index = data_train_flat['series_id']
 
@@ -77,4 +82,4 @@ def predandmap(data_test_flat, km_fit):
 
 
 submission = predandmap(data_test_flat, km_fit)
-submission.to_csv('/home/samuel/Work/coffe2/data/datacc2019/submissions/submission9.csv')
+submission.to_csv(Name_Dir + '/submissions/submission9.csv')

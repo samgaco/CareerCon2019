@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import os
 import pickle
-import numpy as np
 from keras import layers
 from keras.layers import Input, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D
 from keras.layers import AveragePooling2D, MaxPooling2D, Dropout, GlobalMaxPooling2D, GlobalAveragePooling2D
@@ -16,12 +15,9 @@ from IPython.display import SVG
 from keras.layers import Reshape
 from keras.layers import Reshape
 
-
-
-
 from keras.utils.vis_utils import model_to_dot
 from keras.utils import plot_model
-from kt_utils import *
+#from kt_utils import *
 
 import keras.backend as K
 K.set_image_data_format('channels_last')
@@ -30,22 +26,27 @@ from matplotlib.pyplot import imshow
 
 ## data
 
-cwd = os.chdir('/home/samuel/Work/coffe2/data/datacc2019')
+Sam_Dir = '/home/samuel/Work/coffe2/data/datacc2019'
+Ces_Dir = 'D:/Estudi/Uni/Actual/z_Altres/Python/projects/career_con_2019/Data'
+# Elegir directori segons usuari
+Name_Dir = Ces_Dir
 
-data_train_path = '/home/samuel/Work/coffe2/data/datacc2019/X_train.csv'
-response_train_path = '/home/samuel/Work/coffe2/data/datacc2019/y_train.csv'
-test_data_path = '/home/samuel/Work/coffe2/data/datacc2019/X_test.csv'
-sub_data_path = '/home/samuel/Work/coffe2/data/datacc2019/sample_submission.csv'
+def load_data(dir_name):
+    cwd = os.chdir(dir_name)
+    
+    data_train = pd.read_csv(dir_name + '/X_train.csv')
+    response_train = pd.read_csv(dir_name + '/y_train.csv')
+    data_test = pd.read_csv(dir_name + '/X_test.csv')
+    sub_data = pd.read_csv(dir_name + '/sample_submission.csv')
+    #flat sets can be substituted by different sets, we could try grouping by means again, and adding std, etc
+    data_test_flat = pd.read_pickle(dir_name + '/data_test_flat.pkl')
+    data_train_flat = pd.read_pickle(dir_name + '/data_train_flat.pkl')
+    
+    return data_train, response_train, data_test, sub_data, data_test_flat, data_train_flat
 
-data_train = pd.read_csv(data_train_path)
-response_train = pd.read_csv(response_train_path)
-data_test = pd.read_csv(test_data_path)
-sub_data = pd.read_csv(sub_data_path)
+data_train, response_train, data_test, sub_data, \
+data_test_flat, data_train_flat = load_data(Name_Dir)
 
-#flat sets can be substituted by different sets, we could try grouping by means again, and adding std, etc
-
-data_test_flat = pd.read_pickle('/home/samuel/Work/coffe2/data/datacc2019/data_test_flat.pkl')
-data_train_flat = pd.read_pickle('/home/samuel/Work/coffe2/data/datacc2019/data_train_flat.pkl')
 
 data_train_flat.index = data_train_flat['series_id']
 
@@ -60,13 +61,13 @@ data_train_flat.index = data_train_flat['series_id']
 #para que sean tres columnas
 
 data_train_flat_toarray = data_train_flat.drop("series_id", axis = 1)
-input_train = np.zeros((3810,1, 128, 10))
+input_train = np.zeros((3810, 128, 10, 1))
 
 for i in range(data_train_flat_toarray.shape[0]):
     current_row = np.array(data_train_flat_toarray.iloc[i:(i+1), ])
     print(i)
-    current_row =  current_row.reshape(128, 10)
-    input_train[i,...] = current_row
+    current_row =  current_row.reshape(128, 10, 1)
+    input_train[i,:,:,:] = current_row
 
 def cnn_proba(input_shape):
     """
@@ -109,7 +110,7 @@ def cnn_proba(input_shape):
 dummies = pd.get_dummies(response_train.surface)
 
 
-cnn_model = cnn_proba((128,10))
+cnn_model = cnn_proba((128,10,1))
 cnn_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 cnn_model.fit(input_train, dummies, epochs = 35, batch_size = 16)
 
