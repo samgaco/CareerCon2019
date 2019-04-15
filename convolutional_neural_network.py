@@ -62,12 +62,14 @@ data_train_flat.index = data_train_flat['series_id']
 
 data_train_flat_toarray = data_train_flat.drop("series_id", axis = 1)
 input_train = np.zeros((3810, 128, 10, 1))
+input_test = np.zeros((3810, 128, 10, 1))
 
 for i in range(data_train_flat_toarray.shape[0]):
     current_row = np.array(data_train_flat_toarray.iloc[i:(i+1), ])
-    print(i)
+    #print(i)
     current_row =  current_row.reshape(128, 10, 1)
     input_train[i,:,:,:] = current_row
+    input_test[i,:,:,:] = current_row
 
 def cnn_proba(input_shape):
     """
@@ -98,8 +100,14 @@ def cnn_proba(input_shape):
     X = Flatten()(X)
     X = Dense(1, activation='sigmoid', name='fc')(X)
 
+    # Softmax Layer
+    X = Dense(9, activation='softmax')(X)
+
     # Create model. This creates your Keras model instance, you'll use this instance to train/test the model.
     model = Model(inputs=X_input, outputs=X, name='cnn_proba')
+    
+
+    
 
     ### END CODE HERE ###
 
@@ -114,5 +122,7 @@ cnn_model = cnn_proba((128,10,1))
 cnn_model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 cnn_model.fit(input_train, dummies, epochs = 35, batch_size = 16)
 
-#hay que solucionar: ValueError: Error when checking input: expected input_2 to have shape (128, 10, 1) but got array with shape (1, 128, 10)
-#natros tenim les dimensions de input com a (3810, 1, 128, 10), pero tindrien que ser (3810, 128, 10, 1)
+
+pred = pd.DataFrame(cnn_model.predict(input_test))
+# No sembla que estigui be la prediccio, totes les columnes amb el mateix valor
+score = cnn_model.evaluate(input_train, dummies, batch_size=128)
